@@ -1,0 +1,52 @@
+<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+	<plugin-info>
+		<description>${project.description}</description>
+		<version>${project.version}</version>
+		<vendor name="${project.organization.name}" url="${project.organization.url}"/>
+		<param name="plugin-icon">images/pluginIcon.png</param>
+		<param name="plugin-logo">images/pluginLogo.png</param>
+	</plugin-info>
+
+	<!-- add our i18n resource -->
+	<resource type="i18n" name="i18n" location="bamboo_mass_deploy"/>
+
+	<!-- add our web resources -->
+	<web-resource key="bamboo_mass_deploy-resources" name="bamboo_mass_deploy Web Resources">
+		<dependency>com.atlassian.auiplugin:ajs</dependency>
+
+		<resource type="download" name="bamboo_mass_deploy.css" location="/css/bamboo_mass_deploy.css"/>
+		<resource type="download" name="bamboo_mass_deploy.js" location="/js/bamboo_mass_deploy.js"/>
+		<resource type="download" name="images/" location="/images"/>
+
+		<context>bamboo_mass_deploy</context>
+	</web-resource>
+
+	<web-item key="bamboo_mass_deploy" name="Mass Deploy Form" section="header.global.primary" weight="30">
+		<label key="massDeploy.menuLabel"/>
+		<link>/deploymentSetupForm.action</link>
+	</web-item>
+
+	<xwork key="massdeployform" name="View Mass Deploy Form">
+		<package name="massDeployPlugin" extends="default">
+			<action name="deploymentSetupForm" class="au.com.agic.DeploymentSetupForm" method="default">
+				<result name="success" type="freemarker">/deploymentSetupForm.ftl</result>
+			</action>
+			<action name="deploymentResultsForm" class="au.com.agic.DeploymentResultsForm" method="default">
+				<result name="success" type="freemarker">/deploymentResultsForm.ftl</result>
+			</action>
+			<action name="deploymentExecution" class="au.com.agic.DeploymentExecution" method="default">
+				<result name="success" type="redirect-action">
+					<param name="actionName">deploymentResultsForm</param>
+					<param name="results">${resultsParamString}</param>
+				</result>
+			</action>
+			<action name="deploymentVersionJSON" class="au.com.agic.DeploymentVersionJSON">
+				<result name="success" type="json"/>
+			</action>
+		</package>
+	</xwork>
+
+	<!-- import from the product container -->
+	<component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
+
+</atlassian-plugin>

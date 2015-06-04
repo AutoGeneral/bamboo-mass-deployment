@@ -1,0 +1,187 @@
+
+.plugin-mass-deploy-container {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.plugin-mass-deploy-container fieldset {
+	padding-left: 10px !important;
+}
+
+.plugin-mass-deploy-container tbody tr:hover {
+	background-color: rgb(255, 241, 219);
+}
+
+.plugin-mass-deploy-environments {
+	padding-left: 0 !important;
+}
+
+.plugin-mass-deploy-environments .aui-button {
+	vertical-align: bottom;
+}
+
+.plugin-mass-deploy-submit-container {
+	margin: 30px 10px 10px;
+}
+
+.plugin-mass-deploy-submit-container > div {
+	margin-bottom: 10px;
+}
+
+.plugin-mass-deploy-submit-container .cancel {
+	margin-left: 10px;
+}
+
+/*
+    Status labels
+    --------------------------------------------------------------------------
+*/
+
+.status-container span {
+	background: #ccc;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	color: #333;
+	display: inline-block;
+	font-size: 11px;
+	font-weight: bold;
+	line-height: 99%;
+	margin: 0;
+	padding: 2px 5px;
+	text-align: center;
+	text-decoration: none;
+	text-transform: uppercase;
+}
+
+.status-container .status-successful {
+	background-color: #14892c;
+	border-color: #14892c;
+	color: #fff;
+}
+
+.status-container .status-inprogress,
+.status-container .status-pending {
+	background-color: #4a6785;
+	border-color: #4a6785;
+	color: #fff;
+}
+
+.status-container .status-notbuilt,
+.status-container .status-failed,
+.status-container .status-error {
+	background-color: #d04437;
+	border-color: #d04437;
+	color: #fff;
+}
+
+.status-container .status-unknown,
+.status-container .status-queued {
+	background-color: #fff;
+	border-color: #e4e8ed;
+	color: #4a6785;
+}
+
+/*
+    SpinKit spinner
+    https://github.com/tobiasahlin/SpinKit
+    --------------------------------------------------------------------------
+*/
+@-webkit-keyframes three-quarters {
+	0% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+
+	100% {
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+
+@-moz-keyframes three-quarters {
+	0% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+
+	100% {
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+
+@-o-keyframes three-quarters {
+	0% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+
+	100% {
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes three-quarters {
+	0% {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+
+	100% {
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+
+/* Styles for old versions of IE */
+.three-quarters {
+	font-family: sans-serif;
+	font-weight: 100;
+}
+
+/* :not(:required) hides this rule from IE9 and below */
+.three-quarters:not(:required) {
+	-webkit-animation: three-quarters 1250ms infinite linear;
+	-moz-animation: three-quarters 1250ms infinite linear;
+	-ms-animation: three-quarters 1250ms infinite linear;
+	-o-animation: three-quarters 1250ms infinite linear;
+	animation: three-quarters 1250ms infinite linear;
+	border-radius: 16px;
+	box-sizing: border-box;
+	display: inline-block;
+	position: relative;
+	overflow: hidden;
+	text-indent: -9999px;
+	width: 14px;
+	height: 14px;
+	border: 2px solid #0074FF;
+	border-right-color: transparent;
+	vertical-align: middle;
+}
