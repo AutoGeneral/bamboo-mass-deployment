@@ -2,23 +2,23 @@ package au.com.agic;
 
 import com.atlassian.bamboo.deployments.environments.Environment;
 import com.atlassian.bamboo.deployments.environments.service.EnvironmentService;
-import com.atlassian.bamboo.deployments.execution.DeploymentContext;
 import com.atlassian.bamboo.deployments.execution.service.DeploymentExecutionService;
+import com.atlassian.bamboo.deployments.execution.triggering.EnvironmentTriggeringAction;
+import com.atlassian.bamboo.deployments.execution.triggering.EnvironmentTriggeringActionFactory;
 import com.atlassian.bamboo.deployments.results.DeploymentResult;
 import com.atlassian.bamboo.deployments.results.service.DeploymentResultService;
 import com.atlassian.bamboo.deployments.versions.DeploymentVersion;
 import com.atlassian.bamboo.deployments.versions.service.DeploymentVersionService;
+import com.atlassian.bamboo.plan.ExecutionRequestResult;
 import com.atlassian.bamboo.user.BambooAuthenticationContext;
-import com.atlassian.bamboo.v2.build.trigger.ManualBuildTriggerReason;
 import com.atlassian.bamboo.ww2.BambooActionSupport;
+import com.atlassian.user.User;
 import com.opensymphony.xwork2.Action;
 import org.apache.struts2.ServletActionContext;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -36,6 +36,7 @@ public class DeploymentExecution extends BambooActionSupport {
 	private final DeploymentVersionService deploymentVersionService;
 	private final BambooAuthenticationContext bambooAuthenticationContext;
 	private final DeploymentResultService deploymentResultService;
+	private final EnvironmentTriggeringActionFactory environmentTriggeringActionFactory;
 
 	/**
 	 * String we will return with the list of serialized DeploymentObjects
@@ -44,12 +45,13 @@ public class DeploymentExecution extends BambooActionSupport {
 
 	public DeploymentExecution(DeploymentExecutionService deploymentExecutionService, EnvironmentService environmentService,
 							   DeploymentVersionService deploymentVersionService, BambooAuthenticationContext bambooAuthenticationContext,
-							   DeploymentResultService deploymentResultService) {
+							   DeploymentResultService deploymentResultService, EnvironmentTriggeringActionFactory environmentTriggeringActionFactory) {
 		this.deploymentExecutionService = deploymentExecutionService;
 		this.environmentService = environmentService;
 		this.deploymentVersionService = deploymentVersionService;
 		this.bambooAuthenticationContext = bambooAuthenticationContext;
 		this.deploymentResultService = deploymentResultService;
+		this.environmentTriggeringActionFactory = environmentTriggeringActionFactory;
 	}
 
 	/**
@@ -77,29 +79,6 @@ public class DeploymentExecution extends BambooActionSupport {
 		return result;
 	}
 
-	/**
-	 * We need to create custom Trigger Reason for deployments
-	 * and add there information about the user triggered it
-	 * (eg. 'Manual run from the stage: Mass Deployment by Aleksandr Shteinikov')
-	 *
-	 * @return trigger reason prepared to use
-	 */
-	private ManualBuildTriggerReason createTriggerReason() {
-		ManualBuildTriggerReason triggerReason = new ManualBuildTriggerReason();
-		triggerReason.setTextProvider(super.getTextProvider());
-
-		String username = bambooAuthenticationContext.getUserName();
-
-		Map<String, String> fields = new HashMap<String, String>();
-		fields.put(ManualBuildTriggerReason.TRIGGER_MANUAL_USER, username);
-		fields.put(ManualBuildTriggerReason.TRIGGER_MANUAL_STAGE, "Mass Deployment");
-		String key = ManualBuildTriggerReason.KEY;
-
-		triggerReason.init(key, fields);
-
-		return triggerReason;
-	}
-
 	@Override
 	public String doDefault() throws Exception {
 		HttpServletRequest request = ServletActionContext.getRequest();
@@ -111,26 +90,25 @@ public class DeploymentExecution extends BambooActionSupport {
 		if (rawParams != null) {
 			deploymentObjects = getDeploymentInfoFromParams(rawParams);
 		}
-		if (deploymentObjects != null) {
-			// We will have only one trigger reason for all the deployments
-			ManualBuildTriggerReason triggerReason = createTriggerReason();
+		if (deploymentObjects == null) return Action.ERROR;
 
-			for (DeploymentObject deploymentObject : deploymentObjects) {
+		for (DeploymentObject deploymentObject : deploymentObjects) {
+			// Create deployment context and start deployment
+			User user = bambooAuthenticationContext.getUser();
 
-				// Create deployment context and start deployment
-				DeploymentContext deploymentContext =
-					deploymentExecutionService.prepareDeploymentContext(deploymentObject.getTargetEnvironment(), deploymentObject.getVersion(), triggerReason);
+			EnvironmentTriggeringAction environmentTriggeringAction =
+				environmentTriggeringActionFactory.createManualEnvironmentTriggeringAction(deploymentObject.getTargetEnvironment(), deploymentObject.getVersion(), user);
 
-				deploymentExecutionService.execute(deploymentContext);
+			ExecutionRequestResult executionRequestResult = deploymentExecutionService.execute(deploymentObject.getTargetEnvironment(), environmentTriggeringAction);
 
-				DeploymentResult deploymentResult = deploymentResultService.getDeploymentResult(deploymentContext.getDeploymentResultId());
+			if (executionRequestResult.getDeploymentResultId() != null) {
+				DeploymentResult deploymentResult = deploymentResultService.getDeploymentResult(executionRequestResult.getDeploymentResultId());
 				deploymentObject.setResult(deploymentResult);
 
 				// Generate the response string
 				resultsParamString += deploymentObject.serialize() + ";";
 			}
 		}
-
 		return Action.SUCCESS;
 	}
 
