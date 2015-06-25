@@ -1,12 +1,18 @@
 # Mass deployment plugin for Atlassian Bamboo
 
-As part of the migration of our deployment processes from the set of custom tools to CI system Atlassian Bamboo
-we've tried to make our processes easier and faster.Bamboo offers a lot of features and user-friendly API
-to do deployments but unfortunately it doesn't support "one-click deployments" to multiple environments.
+Atlassian Bamboo offers many features for automated deployments but unfortunately it doesn't support "one-click deployments" to multiple environments. This plugin provides a user-friendly interface to deploy/promote multiple deployment results from one environment to another.
+
+### Screenshots
+
+[<img src="https://raw.githubusercontent.com/AutoGeneral/bamboo-mass-deployment/master/src/main/resources/images/screenshot1_small.png">](https://raw.githubusercontent.com/AutoGeneral/bamboo-mass-deployment/master/src/main/resources/images/screenshot1.png)
+
+[<img src="https://raw.githubusercontent.com/AutoGeneral/bamboo-mass-deployment/master/src/main/resources/images/screenshot2_small.png">](https://raw.githubusercontent.com/AutoGeneral/bamboo-mass-deployment/master/src/main/resources/images/screenshot2.png)
 
 ### Install
 
 Use Bamboo's add-ons manager to upload plugin .war file from the /build folder
+
+
 
 ### Build
 
