@@ -14,44 +14,53 @@ import com.atlassian.bamboo.user.BambooAuthenticationContext;
 import com.atlassian.bamboo.ww2.BambooActionSupport;
 import com.atlassian.user.User;
 import com.opensymphony.xwork2.Action;
+
 import org.apache.struts2.ServletActionContext;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Deployment execution controller
  * <p/>
- * This page controller receives 'params' query parameter with the list of serialized DeploymentObjects,
- * parses it and then executes deployments
+ * This page controller receives 'params' query parameter with the list of serialized
+ * DeploymentObjects, parses it and then executes deployments
  * <p/>
  * Exposes resultsParamString field with the serialized list of DeploymentObjects
  */
 public class DeploymentExecution extends BambooActionSupport {
+
+	private static final long serialVersionUID = 7830762978792971693L;
 
 	private final DeploymentExecutionService deploymentExecutionService;
 	private final EnvironmentService environmentService;
 	private final DeploymentVersionService deploymentVersionService;
 	private final BambooAuthenticationContext bambooAuthenticationContext;
 	private final DeploymentResultService deploymentResultService;
-	private final EnvironmentTriggeringActionFactory environmentTriggeringActionFactory;
+	private final EnvironmentTriggeringActionFactory triggeringActionFactory;
 
 	/**
 	 * String we will return with the list of serialized DeploymentObjects
 	 */
 	private String resultsParamString;
 
-	public DeploymentExecution(DeploymentExecutionService deploymentExecutionService, EnvironmentService environmentService,
-							   DeploymentVersionService deploymentVersionService, BambooAuthenticationContext bambooAuthenticationContext,
-							   DeploymentResultService deploymentResultService, EnvironmentTriggeringActionFactory environmentTriggeringActionFactory) {
+	public DeploymentExecution(
+		final DeploymentExecutionService deploymentExecutionService,
+		final EnvironmentService environmentService,
+		final DeploymentVersionService deploymentVersionService,
+		final BambooAuthenticationContext bambooAuthenticationContext,
+		final DeploymentResultService deploymentResultService,
+		final EnvironmentTriggeringActionFactory triggeringActionFactory) {
+
 		this.deploymentExecutionService = deploymentExecutionService;
 		this.environmentService = environmentService;
 		this.deploymentVersionService = deploymentVersionService;
 		this.bambooAuthenticationContext = bambooAuthenticationContext;
 		this.deploymentResultService = deploymentResultService;
-		this.environmentTriggeringActionFactory = environmentTriggeringActionFactory;
+		this.triggeringActionFactory = triggeringActionFactory;
 	}
 
 	/**
@@ -62,7 +71,7 @@ public class DeploymentExecution extends BambooActionSupport {
 	 */
 	private List<DeploymentObject> getDeploymentInfoFromParams(String serializedString) {
 		final String[] parts = serializedString.split(Pattern.quote(";"));
-		List<DeploymentObject> result = new ArrayList<DeploymentObject>();
+		List<DeploymentObject> result = new ArrayList<>();
 
 		for (String part : parts) {
 			String[] param = part.split(Pattern.quote(":"));
@@ -81,28 +90,32 @@ public class DeploymentExecution extends BambooActionSupport {
 
 	@Override
 	public String doDefault() throws Exception {
-		HttpServletRequest request = ServletActionContext.getRequest();
-		List<DeploymentObject> deploymentObjects = new ArrayList<DeploymentObject>();
-
 		resultsParamString = "";
+		List<DeploymentObject> deploymentObjects = null;
+		final HttpServletRequest request = ServletActionContext.getRequest();
+		final String rawParams = request.getParameter("params");
 
-		String rawParams = request.getParameter("params");
 		if (rawParams != null) {
 			deploymentObjects = getDeploymentInfoFromParams(rawParams);
 		}
-		if (deploymentObjects == null) return Action.ERROR;
+		if (deploymentObjects == null) {
+			return Action.ERROR;
+		}
 
 		for (DeploymentObject deploymentObject : deploymentObjects) {
 			// Create deployment context and start deployment
 			User user = bambooAuthenticationContext.getUser();
 
 			EnvironmentTriggeringAction environmentTriggeringAction =
-				environmentTriggeringActionFactory.createManualEnvironmentTriggeringAction(deploymentObject.getTargetEnvironment(), deploymentObject.getVersion(), user);
+				triggeringActionFactory.createManualEnvironmentTriggeringAction(
+					deploymentObject.getTargetEnvironment(), deploymentObject.getVersion(), user);
 
-			ExecutionRequestResult executionRequestResult = deploymentExecutionService.execute(deploymentObject.getTargetEnvironment(), environmentTriggeringAction);
+			ExecutionRequestResult executionRequestResult =
+				deploymentExecutionService.execute(deploymentObject.getTargetEnvironment(), environmentTriggeringAction);
 
 			if (executionRequestResult.getDeploymentResultId() != null) {
-				DeploymentResult deploymentResult = deploymentResultService.getDeploymentResult(executionRequestResult.getDeploymentResultId());
+				DeploymentResult deploymentResult =
+					deploymentResultService.getDeploymentResult(executionRequestResult.getDeploymentResultId());
 				deploymentObject.setResult(deploymentResult);
 
 				// Generate the response string

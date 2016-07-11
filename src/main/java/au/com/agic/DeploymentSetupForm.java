@@ -10,16 +10,15 @@ import com.atlassian.bamboo.deployments.results.service.DeploymentResultService;
 import com.atlassian.bamboo.deployments.versions.DeploymentVersion;
 import com.atlassian.bamboo.ww2.BambooActionSupport;
 import com.opensymphony.xwork2.Action;
-
 import org.apache.struts2.ServletActionContext;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.stream.Collectors;
 
 /**
  * Mass deployment setup form controller
@@ -93,7 +92,7 @@ public class DeploymentSetupForm extends BambooActionSupport {
 		List<DeploymentProject> deploymentProjectsList = deploymentProjectService.getAllDeploymentProjects();
 		deploymentObjects = new ArrayList<>();
 
-		for (DeploymentProject deploymentProject : deploymentProjectsList) {
+		for (final DeploymentProject deploymentProject : deploymentProjectsList) {
 			List<Environment> environments =
 				environmentService.getEnvironmentsForDeploymentProject(deploymentProject.getId());
 
@@ -135,7 +134,7 @@ public class DeploymentSetupForm extends BambooActionSupport {
 	 * @return set of environments names
 	 */
 	private List<String> getAllEnvironments() {
-		List<String> list = new ArrayList<>();
+		final List<String> list = new ArrayList<>();
 
 		try {
 			Iterable<Environment> environments = environmentService.getAllEnvironments();
@@ -148,7 +147,7 @@ public class DeploymentSetupForm extends BambooActionSupport {
 
 		Collections.sort(list);
 
-		return list;
+		return list.stream().distinct().collect(Collectors.toList());
 	}
 
 	/**

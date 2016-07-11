@@ -11,18 +11,22 @@ import com.atlassian.bamboo.deployments.versions.DeploymentVersion;
 import com.atlassian.bamboo.deployments.versions.service.DeploymentVersionService;
 import com.atlassian.bamboo.ww2.BambooActionSupport;
 import com.opensymphony.xwork2.Action;
+
 import org.apache.struts2.ServletActionContext;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Controller for page with the deployments results
  * Deserialized list of DeploymentObjects is expected to be a value for 'results' query param
  */
 public class DeploymentResultsForm extends BambooActionSupport {
+
+	private static final long serialVersionUID = -5744223337014651509L;
 
 	private final DeploymentProjectService deploymentProjectService;
 	private final EnvironmentService environmentService;
@@ -42,16 +46,19 @@ public class DeploymentResultsForm extends BambooActionSupport {
 		return deploymentObjects;
 	}
 
-	public DeploymentResultsForm(AdministrationConfigurationAccessor administrationConfigurationAccessor, EnvironmentService environmentService,
-								 DeploymentVersionService deploymentVersionService, DeploymentResultService deploymentResultService,
-								 DeploymentProjectService deploymentProjectService) {
+	public DeploymentResultsForm(
+		final AdministrationConfigurationAccessor configurationAccessor,
+		final EnvironmentService environmentService,
+		final DeploymentVersionService deploymentVersionService,
+		final DeploymentResultService deploymentResultService,
+		final DeploymentProjectService deploymentProjectService) {
 
 		this.environmentService = environmentService;
 		this.deploymentVersionService = deploymentVersionService;
 		this.deploymentResultService = deploymentResultService;
 		this.deploymentProjectService = deploymentProjectService;
 
-		baseUrl = administrationConfigurationAccessor.getAdministrationConfiguration().getBaseUrl();
+		baseUrl = configurationAccessor.getAdministrationConfiguration().getBaseUrl();
 	}
 
 	/**
@@ -60,24 +67,30 @@ public class DeploymentResultsForm extends BambooActionSupport {
 	 * @param serializedString - serialized list of DeploymentObjects
 	 * @return list of deserialized DeploymentObjects
 	 */
-	private List<DeploymentObject> getDeploymentInfoFromParams(String serializedString) {
+	private List<DeploymentObject> getDeploymentInfoFromParams(final String serializedString) {
 		final String[] parts = serializedString.split(Pattern.quote(";"));
-		List<DeploymentObject> result = new ArrayList<DeploymentObject>();
+		final List<DeploymentObject> result = new ArrayList<DeploymentObject>();
 
-		for (String part : parts) {
-			String[] param = part.split(Pattern.quote(":"));
+		for (final String part : parts) {
+			final String[] param = part.split(Pattern.quote(":"));
 			if (param.length >= 4) {
 
-				Environment environment = environmentService.getEnvironment(Long.parseLong(param[1], 10));
-				DeploymentVersion deploymentVersion = deploymentVersionService.getDeploymentVersion(Long.parseLong(param[2], 10));
-				DeploymentResult deploymentResult = deploymentResultService.getDeploymentResult(Long.parseLong(param[3], 10));
+				final Environment environment =
+					environmentService.getEnvironment(Long.parseLong(param[1], 10));
+				final DeploymentVersion deploymentVersion =
+					deploymentVersionService.getDeploymentVersion(Long.parseLong(param[2], 10));
+				final DeploymentResult deploymentResult =
+					deploymentResultService.getDeploymentResult(Long.parseLong(param[3], 10));
 
 				DeploymentProject deploymentProject = null;
 				if (environment != null) {
-					deploymentProject = deploymentProjectService.getDeploymentProject(environment.getDeploymentProjectId());
+					deploymentProject =
+						deploymentProjectService.getDeploymentProject(environment.getDeploymentProjectId());
 				}
 
-				DeploymentObject deploymentObject = new DeploymentObject(deploymentProject, environment, deploymentVersion, deploymentResult);
+				DeploymentObject deploymentObject =
+					new DeploymentObject(deploymentProject, environment, deploymentVersion, deploymentResult);
+				
 				deploymentObject.serialize();
 
 				result.add(deploymentObject);
@@ -88,8 +101,8 @@ public class DeploymentResultsForm extends BambooActionSupport {
 
 	@Override
 	public String doDefault() throws Exception {
-		HttpServletRequest request = ServletActionContext.getRequest();
-		String rawParams = request.getParameter("results");
+		final HttpServletRequest request = ServletActionContext.getRequest();
+		final String rawParams = request.getParameter("results");
 
 		if (rawParams != null) {
 			deploymentObjects = getDeploymentInfoFromParams(rawParams);

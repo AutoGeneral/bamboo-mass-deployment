@@ -22,7 +22,7 @@ public class DeploymentObject {
 		return targetEnvironment;
 	}
 
-	public void setTargetEnvironment(Environment targetEnvironment) {
+	public void setTargetEnvironment(final Environment targetEnvironment) {
 		this.targetEnvironment = targetEnvironment;
 	}
 
@@ -30,7 +30,7 @@ public class DeploymentObject {
 		return version;
 	}
 
-	public void setVersion(DeploymentVersion version) {
+	public void setVersion(final DeploymentVersion version) {
 		this.version = version;
 	}
 
@@ -38,7 +38,7 @@ public class DeploymentObject {
 		return project;
 	}
 
-	public void setProject(DeploymentProject project) {
+	public void setProject(final DeploymentProject project) {
 		this.project = project;
 	}
 
@@ -46,7 +46,7 @@ public class DeploymentObject {
 		return result;
 	}
 
-	public void setResult(DeploymentResult result) {
+	public void setResult(final DeploymentResult result) {
 		this.result = result;
 	}
 
@@ -54,14 +54,16 @@ public class DeploymentObject {
 		return code;
 	}
 
-	public DeploymentObject(DeploymentProject project, Environment targetEnvironment, DeploymentVersion version, DeploymentResult result) {
+	public DeploymentObject(final DeploymentProject project, final Environment targetEnvironment,
+		final DeploymentVersion version, final DeploymentResult result) {
+
 		this.project = project;
 		this.targetEnvironment = targetEnvironment;
 		this.version = version;
 		this.result = result;
 	}
 
-	private String getSerializedId(BambooIdProvider entity) {
+	private String getSerializedId(final BambooIdProvider entity) {
 		if (entity != null) {
 			return Long.toString(entity.getId());
 		}

@@ -6,8 +6,10 @@ import com.atlassian.bamboo.ww2.BambooActionSupport;
 import com.opensymphony.webwork.dispatcher.json.JSONException;
 import com.opensymphony.webwork.dispatcher.json.JSONObject;
 import com.opensymphony.xwork2.Action;
+
 import org.apache.struts2.ServletActionContext;
 import org.jetbrains.annotations.NotNull;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -29,14 +31,15 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class DeploymentVersionJSON extends BambooActionSupport {
 
+	private static final long serialVersionUID = -122842815102740306L;
 	private final DeploymentResultService deploymentResultService;
-	private JSONObject jsonObject = new JSONObject();
+	private final JSONObject jsonObject = new JSONObject();
 
-	public DeploymentVersionJSON(DeploymentResultService deploymentResultService) {
+	public DeploymentVersionJSON(final DeploymentResultService deploymentResultService) {
 		this.deploymentResultService = deploymentResultService;
 	}
 
-	private void errorResponse(String message) throws JSONException {
+	private void errorResponse(final String message) throws JSONException {
 		jsonObject.put("status", "error");
 		jsonObject.put("message", message);
 	}
@@ -49,8 +52,8 @@ public class DeploymentVersionJSON extends BambooActionSupport {
 
 		try {
 			versionId = Long.parseLong(request.getParameter("version"), 10);
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
+		} catch (NumberFormatException ex) {
+			ex.printStackTrace();
 		}
 
 		if (versionId == null) {
