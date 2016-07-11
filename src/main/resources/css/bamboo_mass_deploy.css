@@ -1,8 +1,5 @@
 
 .plugin-mass-deploy-container {
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
 	user-select: none;
 }
 
@@ -12,10 +9,6 @@
 
 .plugin-mass-deploy-container tbody tr:hover {
 	background-color: rgb(255, 241, 219);
-}
-
-.plugin-mass-deploy-environments {
-	padding-left: 0 !important;
 }
 
 .plugin-mass-deploy-environments .aui-button {
