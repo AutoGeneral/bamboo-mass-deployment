@@ -17,22 +17,31 @@ ${webResourceManager.requireResource("au.com.agic.bamboo_mass_deploy:bamboo_mass
 					another
 				</div>
 
+                <div class="field-group plugin-mass-deploy-environments">
+                    <label>Filter environments</label>
+                    <input type="text" name="filter" class="text" value="${filter}" data-provide="environment-filter"/>
+                </div>
+
 				<div class="field-group plugin-mass-deploy-environments">
-					From:
-					<select class="select" name="fromEnv">
+					<label>From environment</label>
+					<select class="select" name="fromEnv" data-provide="environment-list-from">
 						[#list environmentsList as env]
 							<option value="${env}" [#if env == fromEnv] selected [/#if]>${env}</option>
 						[/#list]
 					</select>
+				</div>
 
-					&nbsp; to:
-					<select class="select" name="toEnv">
+                <div class="field-group plugin-mass-deploy-environments">
+                    <label>To environment</label>
+					<select class="select" name="toEnv" data-provide="environment-list-to">
 						[#list environmentsList as env]
 							<option value="${env}" [#if env == toEnv] selected [/#if]>${env}</option>
 						[/#list]
 					</select>
+				</div>
 
-					<input class="aui-button" type="submit" value="Search"/>
+				<div class="field-group plugin-mass-deploy-environments">
+                    <input class="aui-button" type="submit" value="Search"/>
 				</div>
 
 			</fieldset>

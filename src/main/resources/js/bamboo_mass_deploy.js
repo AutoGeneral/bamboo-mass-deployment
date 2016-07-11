@@ -19,6 +19,9 @@
 		var $selectCheckboxes = $(_provide('select-project-checkbox')),
 			$deployButton = $(_provide('deploy-button')),
 			$safetyCheckbox = $(_provide('safety-check')),
+			$envListFrom = $(_provide('environment-list-from')),
+			$envListTo = $(_provide('environment-list-to')),
+			$envFilterInput = $(_provide('environment-filter')),
 			urlParams = [];
 
 		var changeSubmitButtonState = function () {
@@ -47,7 +50,28 @@
 
 		$deployButton.click(function () {
 			window.location.href = SUBMIT_URL + '?params=' + urlParams.join(';');
-		})
+		});
+
+		$envFilterInput.change(function () {
+			var filterValue = $(this).val();
+			filterEnvironmentOptions($envListFrom, filterValue);
+			filterEnvironmentOptions($envListTo, filterValue);
+		});
+
+		$envFilterInput.change();
+
+		function filterEnvironmentOptions ($list, filter) {
+			$list.find('option').each(function (i, option) {
+				var $option = $(option),
+					isVisible = new RegExp(filter, 'gi').test($option.text());
+
+				if (isVisible) $option.show();
+				else {
+					if ($option.is(':selected')) $option.prop("selected", false);
+					$option.hide();
+				}
+			});
+		}
 	}
 
 	/**

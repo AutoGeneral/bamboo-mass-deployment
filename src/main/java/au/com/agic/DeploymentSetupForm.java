@@ -10,15 +10,25 @@ import com.atlassian.bamboo.deployments.results.service.DeploymentResultService;
 import com.atlassian.bamboo.deployments.versions.DeploymentVersion;
 import com.atlassian.bamboo.ww2.BambooActionSupport;
 import com.opensymphony.xwork2.Action;
+
 import org.apache.struts2.ServletActionContext;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
 
 /**
  * Mass deployment setup form controller
  */
 public class DeploymentSetupForm extends BambooActionSupport {
+
+	private static final String DEFAULT_ENV_FILTER = "AWS";
+	private static final long serialVersionUID = 2365222749104955291L;
+
 	private final DeploymentProjectService deploymentProjectService;
 	private final DeploymentResultService deploymentResultService;
 	private final EnvironmentService environmentService;
@@ -27,8 +37,9 @@ public class DeploymentSetupForm extends BambooActionSupport {
 
 	private String fromEnv = "";
 	private String toEnv = "";
+	private String filter = "";
 
-	private Set<String> environmentsList = new HashSet<String>();
+	private List<String> environmentsList = new ArrayList<>();
 	private List<DeploymentObject> deploymentObjects;
 
 	@Nullable
@@ -53,22 +64,26 @@ public class DeploymentSetupForm extends BambooActionSupport {
 		return toEnv;
 	}
 
+	public String getFilter() {
+		return filter;
+	}
+
 	@SuppressWarnings("unused")
-	public Set<String> getEnvironmentsList() {
+	public List<String> getEnvironmentsList() {
 		return environmentsList;
 	}
 
-	public DeploymentSetupForm(DeploymentProjectService deploymentProjectService,
-							   EnvironmentService environmentService,
-							   DeploymentResultService deploymentResultService,
-							   AdministrationConfigurationAccessor administrationConfigurationAccessor) {
+	public DeploymentSetupForm(final DeploymentProjectService deploymentProjectService,
+		final EnvironmentService environmentService,
+		final DeploymentResultService deploymentResultService,
+		final AdministrationConfigurationAccessor configurationAccessor) {
 
 		this.deploymentProjectService = deploymentProjectService;
 		this.deploymentResultService = deploymentResultService;
 		this.environmentService = environmentService;
 
 		environmentsList = getAllEnvironments();
-		baseUrl = administrationConfigurationAccessor.getAdministrationConfiguration().getBaseUrl();
+		baseUrl = configurationAccessor.getAdministrationConfiguration().getBaseUrl();
 	}
 
 	@Override
@@ -76,10 +91,11 @@ public class DeploymentSetupForm extends BambooActionSupport {
 		setEnvVariables();
 
 		List<DeploymentProject> deploymentProjectsList = deploymentProjectService.getAllDeploymentProjects();
-		deploymentObjects = new ArrayList<DeploymentObject>();
+		deploymentObjects = new ArrayList<>();
 
 		for (DeploymentProject deploymentProject : deploymentProjectsList) {
-			List<Environment> environments = environmentService.getEnvironmentsForDeploymentProject(deploymentProject.getId());
+			List<Environment> environments =
+				environmentService.getEnvironmentsForDeploymentProject(deploymentProject.getId());
 
 			Environment fromEnvironment = null;
 			Environment toEnvironment = null;
@@ -94,11 +110,14 @@ public class DeploymentSetupForm extends BambooActionSupport {
 			}
 
 			if (fromEnvironment != null && toEnvironment != null) {
-				DeploymentResult deploymentResult = deploymentResultService.getLatestDeploymentResultForEnvironment(fromEnvironment.getId());
+				DeploymentResult deploymentResult =
+					deploymentResultService.getLatestDeploymentResultForEnvironment(fromEnvironment.getId());
+
 				if (deploymentResult != null) {
 					DeploymentVersion deploymentVersion = deploymentResult.getDeploymentVersion();
 					if (deploymentVersion != null) {
-						DeploymentObject deploymentObject = new DeploymentObject(deploymentProject, toEnvironment, deploymentVersion, null);
+						DeploymentObject deploymentObject =
+							new DeploymentObject(deploymentProject, toEnvironment, deploymentVersion, null);
 						deploymentObject.serialize();
 
 						deploymentObjects.add(deploymentObject);
@@ -115,19 +134,21 @@ public class DeploymentSetupForm extends BambooActionSupport {
 	 *
 	 * @return set of environments names
 	 */
-	private Set<String> getAllEnvironments() {
-		Set<String> environmentsSet = new HashSet<String>();
+	private List<String> getAllEnvironments() {
+		List<String> list = new ArrayList<>();
 
 		try {
 			Iterable<Environment> environments = environmentService.getAllEnvironments();
 			for (Environment environment : environments) {
-				environmentsSet.add(environment.getName());
+				list.add(environment.getName());
 			}
-		} catch (Exception e) {
+		} catch (Exception ex) {
 			// Not authorised
 		}
 
-		return environmentsSet;
+		Collections.sort(list);
+
+		return list;
 	}
 
 	/**
@@ -135,9 +156,16 @@ public class DeploymentSetupForm extends BambooActionSupport {
 	 * related object's fields
 	 */
 	private void setEnvVariables() {
-		HttpServletRequest request = ServletActionContext.getRequest();
-		String fromEnvRaw = request.getParameter("fromEnv");
-		String toEnvRaw = request.getParameter("toEnv");
+		final HttpServletRequest request = ServletActionContext.getRequest();
+		final String fromEnvRaw = request.getParameter("fromEnv");
+		final String toEnvRaw = request.getParameter("toEnv");
+		final String filterRaw = request.getParameter("filter");
+
+		if (filterRaw != null) {
+			filter = filterRaw;
+		} else {
+			filter = DEFAULT_ENV_FILTER;
+		}
 
 		if (fromEnvRaw != null) {
 			fromEnv = fromEnvRaw;
@@ -146,6 +174,7 @@ public class DeploymentSetupForm extends BambooActionSupport {
 				fromEnv = environmentsList.iterator().next();
 			}
 		}
+
 		if (toEnvRaw != null) {
 			toEnv = toEnvRaw;
 		} else {
