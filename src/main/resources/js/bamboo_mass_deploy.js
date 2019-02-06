@@ -49,7 +49,11 @@
 		});
 
 		$deployButton.click(function () {
-			window.location.href = SUBMIT_URL + '?params=' + urlParams.join(';');
+			$('<form>', {
+				'action' : SUBMIT_URL + '?params=' + urlParams.join(';')
+					+ '&atl_token=' + $.cookie('atl.xsrf.token'),
+				'method' : 'post'
+			}).appendTo(document.body).submit();
 		});
 
 		$envFilterInput.change(function () {
